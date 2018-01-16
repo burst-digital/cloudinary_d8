@@ -299,11 +299,57 @@ class CloudinaryStreamWrapper implements StreamWrapperInterface {
 
     list($scheme, $target) = explode('://', $uri, 2);
 
-    // Check the scheme that include folder.
-    $pos = strpos($scheme, '.');
-    if ($pos) {
-      $this->folderName = trim(substr($scheme, $pos + 1));
+//    // Check the scheme that include folder.
+//    $pos = strpos($scheme, '.');
+//    if ($pos) {
+//      $this->folderName = trim(substr($scheme, $pos + 1));
+//    }
+
+    /*
+     * BURST
+     *
+     * Enforce multisite folder structure
+     * TODO: Fix this ugly hack!
+     */
+    /** @var \Drupal\Core\Config\ImmutableConfig $config */
+    $config = \Drupal::config('cloudinary_sdk.settings');
+    $folders = $config->get('cloudinary_stream_wrapper_folders');
+
+    $drupalName = NULL;
+    foreach($folders as $folder => $value) {
+      if ($folder === $value) {
+        if ($drupalName === NULL) {
+          $drupalName = $value;
+
+        } else {
+          \Drupal::logger('cloudinary')->error('Unable to determine the base folder as multiple folders are selected in the cloudinary stream wrapper settings.');
+        }
+      }
     }
+
+    $realpath = \Drupal::service('file_system')->realpath('public://');
+    $explodedPath = explode('/', $realpath);
+
+    $size = sizeof($explodedPath);
+
+    if ($size < 2 || $explodedPath[$size-1] !== 'files') {
+      \Drupal::logger('cloudinary')->error('Could not determine sitename from path.');
+      die();
+    }
+
+    // Set sitename to folder before 'files'
+    $siteName = $explodedPath[$size-2];
+
+    $folderName = $siteName;
+
+    if ($drupalName !== NULL) {
+      $folderName = $drupalName . '/' . $folderName;
+    }
+
+    $this->folderName = $folderName;
+    /*
+     * BURST
+     */
 
     // Remove erroneous leading or trailing, forward-slashes and backslashes.
     return trim($target, '\/');
