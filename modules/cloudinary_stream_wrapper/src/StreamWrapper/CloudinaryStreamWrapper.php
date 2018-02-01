@@ -352,7 +352,12 @@ class CloudinaryStreamWrapper implements StreamWrapperInterface {
      */
 
     // Remove erroneous leading or trailing, forward-slashes and backslashes.
-    return trim($target, '\/');
+    $target = trim($target, '\/');
+
+    // Replace disallowed special char & with _
+    $target = str_replace('&', '_', $target);
+
+    return $target;
   }
 
   /**
