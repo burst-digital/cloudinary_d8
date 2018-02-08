@@ -316,13 +316,15 @@ class CloudinaryStreamWrapper implements StreamWrapperInterface {
     $folders = $config->get('cloudinary_stream_wrapper_folders');
 
     $drupalName = NULL;
-    foreach($folders as $folder => $value) {
-      if ($folder === $value) {
-        if ($drupalName === NULL) {
-          $drupalName = $value;
+    if (!empty($folders)) {
+      foreach ($folders as $folder => $value) {
+        if ($folder === $value) {
+          if ($drupalName === NULL) {
+            $drupalName = $value;
 
-        } else {
-          \Drupal::logger('cloudinary')->error('Unable to determine the base folder as multiple folders are selected in the cloudinary stream wrapper settings.');
+          } else {
+            \Drupal::logger('cloudinary')->error('Unable to determine the base folder as multiple folders are selected in the cloudinary stream wrapper settings.');
+          }
         }
       }
     }
