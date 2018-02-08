@@ -354,8 +354,9 @@ class CloudinaryStreamWrapper implements StreamWrapperInterface {
     // Remove erroneous leading or trailing, forward-slashes and backslashes.
     $target = trim($target, '\/');
 
-    // Replace disallowed special chars &,%(@^ with _
-    $target = str_replace('&,%(@^', '_', $target);
+    // Replace invalid chars with _
+    $invalidChars = ['?', '&', '#', '\\', '%', '<', '>']; // See: https://cloudinary.com/documentation/upload_images
+    $target = str_replace($invalidChars, '_', $target);
 
     return $target;
   }
