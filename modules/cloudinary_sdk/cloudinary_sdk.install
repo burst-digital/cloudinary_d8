@@ -5,14 +5,14 @@
  * Provides installation functions for cloudinary_sdk module.
  */
 
+use Drupal\Core\Url;
+
 /**
  * Implements hook_uninstall().
  */
 function cloudinary_sdk_uninstall() {
   // Remove unused variables.
-  \Drupal::config('cloudinary_sdk.settings')->clear('cloudinary_sdk_cloud_name')->save();
-  \Drupal::config('cloudinary_sdk.settings')->clear('cloudinary_sdk_api_key')->save();
-  \Drupal::config('cloudinary_sdk.settings')->clear('cloudinary_sdk_api_secret')->save();
+  \Drupal::configFactory()->getEditable('cloudinary_sdk.settings')->delete();
 }
 
 /**
@@ -58,12 +58,11 @@ function cloudinary_sdk_requirements($phase) {
     $config = cloudinary_sdk_config_load();
     if (empty($config)) {
       $r['severity'] = REQUIREMENT_WARNING;
-      $r['description'] = $t("The required cloud name, API key and API secret of Cloudinary hasn't been set.");
       // Add link to configuration form.
-      // @FIXME
-// l() expects a Url object, created from a route name or external URI.
-// $r['description'] .= l($t('Configure'), 'admin/config/media/cloudinary', array('attributes' => array('class' => array('module-link', 'module-link-configure'))));
-
+      $url = Url::fromRoute('cloudinary_sdk.settings')->toString(TRUE)->getGeneratedUrl();
+      $r['description'] = t("The required cloud name, API key and API secret of Cloudinary hasn't been set. <a href=':url'>Configure</a>", [
+        ':url' => $url,
+      ]);
     }
   }
 
