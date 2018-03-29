@@ -992,11 +992,20 @@ class CloudinaryStreamWrapper implements StreamWrapperInterface {
    * @see http://php.net/manual/streamwrapper.dir-opendir.php
    */
   public function dir_opendir($uri, $options) {
+    // Try to load the directory.
     $resource = $this->loadResource($uri);
 
-    if ($resource) {
-      $list = array('.', '..');
+    // If the directory doesn't exist and Cloudinary isn't set to auto-create
+    // directories, we return FALSE to indicate loading failed.
+    if (!$resource && $this->autoCreateFolder) {
+      return FALSE;
+    }
 
+    // Every directory always has these contents.
+    $list = ['.', '..'];
+
+    // When the resource successfully loaded, add all folders and files to its contents.
+    if ($resource) {
       if (isset($this->resource['folders']) && !empty($this->resource['folders'])) {
         $list = array_merge($list, $this->resource['folders']);
       }
@@ -1012,12 +1021,14 @@ class CloudinaryStreamWrapper implements StreamWrapperInterface {
       }
 
       sort($list);
-      $this->directoryList = $list;
-
-      return TRUE;
     }
 
-    return FALSE;
+    // We also return the (empty) contents when resource loading failed and
+    // 'Enable folder API creation' is off. Also see issue #2956672 and the
+    // ::url_stat() function.
+    $this->directoryList = $list;
+
+    return TRUE;
   }
 
   /**
