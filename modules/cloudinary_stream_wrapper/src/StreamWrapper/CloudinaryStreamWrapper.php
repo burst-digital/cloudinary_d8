@@ -321,9 +321,6 @@ class CloudinaryStreamWrapper implements StreamWrapperInterface {
         if ($folder === $value) {
           if ($drupalName === NULL) {
             $drupalName = $value;
-
-          } else {
-            \Drupal::logger('cloudinary')->error('Unable to determine the base folder as multiple folders are selected in the cloudinary stream wrapper settings.');
           }
         }
       }
@@ -345,10 +342,11 @@ class CloudinaryStreamWrapper implements StreamWrapperInterface {
     $folderName = $siteName;
 
     if ($drupalName !== NULL) {
-      $folderName = $drupalName . '/' . $folderName;
+      $folderName = str_replace('_', '.', $drupalName);
     }
 
     $this->folderName = $folderName;
+
     /*
      * BURST
      */
